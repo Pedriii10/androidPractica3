@@ -1,40 +1,48 @@
 package com.example.practica3
 
-import android.content.Intent
+import YourFragment
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.LayoutInflater
+import com.example.practica3.Class.Imc
 import com.example.practica3.databinding.ActivityMainBinding
-import com.example.practica3.FileManager
-
-
-private const val WEIGHT_EXTRA = "weight"
-private const val HEIGHT_EXTRA = "height"
-private const val GENDER_EXTRA = "gender"
-private var weight: Double = 0.0
-private var height: Double = 0.0
-private var gender: String = ""
-
-
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var fileManager: FileManager
+    private var history: MutableList<Imc> = mutableListOf()
+    private var fragment: YourFragment? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        fileManager = FileManager(this)
-
         binding.calcButton.setOnClickListener {
             if (isFieldsValid()) {
                 saveDataAndCalculateIMC()
             }
         }
+
+        fragment = supportFragmentManager.findFragmentById(R.id.main_activity) as? YourFragment
+
+        binding.calcButton.setOnClickListener {
+            if (isFieldsValid()) {
+                saveDataAndCalculateIMC()
+                fragment?.updateHistory(history)
+            }
+        }
+
+        binding.historicButton.setOnClickListener {
+            val fragment = YourFragment.newInstance()
+            supportFragmentManager.beginTransaction().apply {
+                replace(R.id.main_activity, fragment)
+                addToBackStack(null)
+                commit()
+            }
+        }
+
     }
 
     private fun isFieldsValid(): Boolean {
@@ -64,8 +72,6 @@ class MainActivity : AppCompatActivity() {
 
             val IMC = calculateIMC(weight, height, gender)
             val formattedIMC = String.format("%.2f", IMC)
-
-            fileManager.saveDataToFile(IMC, formattedIMC, getIMCState(IMC, gender), gender)
 
             binding.textViewResult.text = formattedIMC
 
@@ -99,6 +105,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    fun getHistory(): MutableList<Imc> {
+        return history
+    }
 }
-
-

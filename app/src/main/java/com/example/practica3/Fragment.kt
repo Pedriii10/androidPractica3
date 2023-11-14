@@ -1,61 +1,59 @@
-package com.example.practica3
-
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.practica3.databinding.FragmentFragmentBinding
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
+import com.example.practica3.Class.Imc
+import com.example.practica3.MainActivity
+import com.example.practica3.R
+import com.example.practica3.databinding.FragmentFragemtBinding
 
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-class MyFragment : Fragment() {
-    private var param1: String? = null
-    private var param2: String? = null
-    private lateinit var binding: FragmentFragmentBinding
-    private lateinit var fileManager: FileManager
-    private lateinit var historyAdapter: HistoryAdapter // Asegúrate de tener un adaptador adecuado
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-
-        fileManager = FileManager(requireContext())
-        historyAdapter = HistoryAdapter(fileManager.readDataFromFile())
-    }
+class YourFragment : Fragment() {
+    private var historyFr: MutableList<Imc> = mutableListOf()
+    private lateinit var binding: FragmentFragemtBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentFragmentBinding.inflate(inflater, container, false)
-        return binding.root
+        return inflater.inflate(R.layout.fragment_fragemt, container, false)
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupRecyclerView()
+        recyclerView()
     }
 
-    private fun setupRecyclerView() {
-        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerView.adapter = historyAdapter
+    private fun recyclerView(){
+        binding.fragmentLayout.apply {
+            setHasFixedSize(true)
+            layoutManager = GridLayoutManager(this@YourFragment.context, 1)
+            val adapter = ImcAdapter()
+            adapter.updateData(history())
+            this.adapter = adapter
+        }
     }
 
-    companion object {
+
+    private fun history(): MutableList<Imc> {
+        requireActivity().apply { historyFr=(this as MainActivity).getHistory()}
+        return historyFr
+    }
+
+    fun updateHistory(updatedHistory: MutableList<Imc>) {
+        historyFr = updatedHistory
+        (binding.fragmentLayout.adapter as? ImcAdapter)?.updateData(updatedHistory)
+    }
+
+
+    companion object{
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            MyFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+        fun newInstance() =
+            YourFragment()
+        }
     }
-}
+
