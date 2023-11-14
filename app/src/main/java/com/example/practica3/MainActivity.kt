@@ -13,19 +13,12 @@ class MainActivity : AppCompatActivity() {
     private var history: MutableList<Imc> = mutableListOf()
     private var fragment: YourFragment? = null
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.calcButton.setOnClickListener {
-            if (isFieldsValid()) {
-                saveDataAndCalculateIMC()
-            }
-        }
-
-        fragment = supportFragmentManager.findFragmentById(R.id.main_activity) as? YourFragment
+        fragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as? YourFragment
 
         binding.calcButton.setOnClickListener {
             if (isFieldsValid()) {
@@ -37,12 +30,11 @@ class MainActivity : AppCompatActivity() {
         binding.historicButton.setOnClickListener {
             val fragment = YourFragment.newInstance()
             supportFragmentManager.beginTransaction().apply {
-                replace(R.id.main_activity, fragment)
+                replace(R.id.fragment_container, fragment) // Reemplazar en el contenedor del fragmento
                 addToBackStack(null)
                 commit()
             }
         }
-
     }
 
     private fun isFieldsValid(): Boolean {
