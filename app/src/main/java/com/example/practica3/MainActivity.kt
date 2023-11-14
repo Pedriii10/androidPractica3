@@ -4,6 +4,8 @@ import YourFragment
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
+import android.view.View
 import com.example.practica3.Class.Imc
 import com.example.practica3.databinding.ActivityMainBinding
 
@@ -12,25 +14,26 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var history: MutableList<Imc> = mutableListOf()
     private var fragment: YourFragment? = null
-
+    private var isVisibility: Boolean = true
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        fragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as? YourFragment
+        fragment = supportFragmentManager.findFragmentById(R.id.main_activity) as? YourFragment
 
         binding.calcButton.setOnClickListener {
             if (isFieldsValid()) {
                 saveDataAndCalculateIMC()
-                fragment?.updateHistory(history)
             }
         }
 
         binding.historicButton.setOnClickListener {
+            isVisible()
             val fragment = YourFragment.newInstance()
             supportFragmentManager.beginTransaction().apply {
-                replace(R.id.fragment_container, fragment) // Reemplazar en el contenedor del fragmento
+                replace(R.id.main_activity, fragment)
                 addToBackStack(null)
                 commit()
             }
@@ -67,7 +70,17 @@ class MainActivity : AppCompatActivity() {
 
             binding.textViewResult.text = formattedIMC
 
-            binding.stateResult.text = getIMCState(IMC, gender)
+            val state = getIMCState(IMC, gender)
+
+            binding.stateResult.text = state
+
+            val objectImc = Imc(gender, formattedIMC, state, 7 , "Diciembre", 2020 )
+
+
+            if (objectImc != null) {
+                history.add(objectImc)
+            }
+
         } catch (e: NumberFormatException) {
             e.printStackTrace()
         }
@@ -98,7 +111,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun isVisible(){
+        if (isVisibility){
+            binding.containerView.visibility = View.INVISIBLE
+            binding.fragment.visibility = View.VISIBLE
+        }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        binding.containerView.visibility = View.VISIBLE
+    }
+
     fun getHistory(): MutableList<Imc> {
         return history
     }
+}
+
+private fun <E> MutableList<E>.add(element: () -> E) {
+
 }
